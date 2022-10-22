@@ -330,8 +330,20 @@ async def request_fans_(bot: Bot, event: GroupRequestEvent):
                             approve=True,
                             reason=' ',
                         )
-            else:
-                logger.error('fans off = group{group_id}')
+                if  '请求错误' in response_fans_text:
+                        await bot.set_group_add_request(
+                            flag=flag,
+                            sub_type=sub_type,
+                            approve=False,
+                            reason='UID输入错误|不要输入用户名/UID:前缀',
+                        )
+                else:
+                    await bot.set_group_add_request(
+                        flag=flag,
+                        sub_type=sub_type,
+                        approve=False,
+                        reason='您不属于主播的粉丝，请确认关注',
+                    )
             # 粉丝团成员入群
             if 'on' == switcher_barand:
                 cookies = {"cookie": cookie_}
@@ -349,11 +361,24 @@ async def request_fans_(bot: Bot, event: GroupRequestEvent):
                             approve=True,
                             reason=' ',
                         )
-                #未配置cookie提示
-                if  '账号未登录' in response_barand_text:
-                    logger.error('BiliRequest: 未配置cookies')
+                # 判断非UID
+                if  '请求错误' in response_barand_text:
+                        await bot.set_group_add_request(
+                            flag=flag,
+                            sub_type=sub_type,
+                            approve=False,
+                            reason='UID输入错误|不要输入用户名/UID:前缀',
+                        )
+                # 判断拒绝
+                else:
+                    await bot.set_group_add_request(
+                        flag=flag,
+                        sub_type=sub_type,
+                        approve=False,
+                        reason='您不属于主播的粉丝团，请确认卡牌子情况',
+                    )
             else:
-                logger.error('barand off = group{group_id}')
+                logger.error('该用户请求错误或不是粉丝团/粉丝')
             # 以下功能暂未实现(大航海船员入群)
             '''
             if 'on' == switcher_crewmate:
