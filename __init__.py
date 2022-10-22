@@ -330,6 +330,9 @@ async def request_fans_(bot: Bot, event: GroupRequestEvent):
                             approve=True,
                             reason=' ',
                         )
+                #未配置cookie提示
+                if  '账号未登录' in response_barand_text:
+                    logger.error('BiliRequest: 未配置cookies')
                 if  '请求错误' in response_fans_text:
                         await bot.set_group_add_request(
                             flag=flag,
