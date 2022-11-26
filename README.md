@@ -28,7 +28,6 @@ pip install nonebot_plugin_BiliRequestAll
 ## 说明依赖
 ```
 10| import os, json, time, requests
-11| from xml.etree.ElementTree import Comment
 12| from nonebot.adapters import Message
 13| from nonebot.params import CommandArg
 14| from nonebot.permission import SUPERUSER
