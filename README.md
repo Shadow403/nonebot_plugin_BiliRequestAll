@@ -22,30 +22,24 @@
 pip install nonebot_plugin_BiliRequestAll
 ```
 
-- 放入src\plugin目录下
-- 重新加载插件
-
 ## 说明依赖
 ```
-10| import os, json, time, requests
-12| from nonebot.adapters import Message
-13| from nonebot.params import CommandArg
-14| from nonebot.permission import SUPERUSER
-15| from nonebot import on_request,on_command, logger
-16| from nonebot.adapters.onebot.v11 import Bot, GroupRequestEvent, GroupMessageEvent
-17| from nonebot.adapters.onebot.v11.permission import GROUP_OWNER, GROUP_ADMIN
+01| nonebot2 >= 2.0.0b1
+02| nonebot-adapter-onebot >= 2.0.0b1
+03| requests >= 2.5
+04| os, json, time
 ```
 ## 命令
 ### 基础命令
-- #### <font color="red"> /req initialize </font> # 初始化群审核插件
-- #### <font color="red"> /req </font> <font color="green"> on/off </font> # 群审核主开关
-- #### <font color="red"> /req fans </font> <font color="green"> on/off </font> # 群审核粉丝开关
-- #### <font color="red"> /req barand </font> <font color="green"> on/off </font> # 群审核粉丝团开关
-- #### <font color="grey"> /req crewmate </font> <font color="grey"> on/off </font> <font color="grey"># 群审核大航海船员开关（暂未实现）</font>
+- #### /req initialize  # 初始化群审核插件
+- #### /req   on/off  # 群审核主开关
+- #### /req fans   on/off  # 群审核粉丝开关
+- #### /req barand   on/off  # 群审核粉丝团开关
+- ####  /req crewmate   on/off  # 群审核大航海船员开关（暂未实现）
 ### 配置参数命令
-- #### <font color="red"> /upuid </font> <font color="green"> <纯数字> </font> # 配置主播UID
-- #### <font color="red"> /liveid </font> <font color="green"> <纯数字> </font> # 配置直播间号
-- #### <font color="red"> /barandname </font> <font color="green"> <粉丝牌名> </font> # 配置粉丝牌名 
+- #### /upuid   <纯数字>  # 配置主播UID
+- #### /liveid   <纯数字>  # 配置直播间号
+- #### /barandname   <粉丝牌名>  # 配置粉丝牌名 
 
 ## 注意事项
 ```
