@@ -1,380 +1,352 @@
-# python 3.10.5
-# Time    : 2022/10/03
+# python  : 3.10.5
+# Time    : 2023/1/19
 # Author  : Shadow403
 # Email   : anonymous_hax@foxmail.com
-# File    : BiliRequestAll.py
 # Software: Visual Studio Code
 
-version = '0.1.0'
+import os, json, requests, logging, datetime
 
-import os, json, time, requests
 from nonebot.adapters import Message
 from nonebot.params import CommandArg
 from nonebot.permission import SUPERUSER
-from nonebot import on_request, on_command, logger
+from nonebot import on_request, on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupRequestEvent, GroupMessageEvent
 from nonebot.adapters.onebot.v11.permission import GROUP_OWNER, GROUP_ADMIN
 
-filesave_dir = 'switcher_group' # 文件夹名称
-cookie = '@cookie.json' # cookie文件名
+file_dir = 'group_switcher'
+log_dir = 'log'
+cookies_json = 'cookies.json'
+cookies_init = {"cookies": "<Put Your Cookie In Here>"}
 
-request_main = on_command('/req', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)              # 主开关
-request_initial = on_command('/req initialize', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)   # 初始化
-request_fans = on_command('/req fans', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)         # 粉丝开关
-request_barand = on_command('/req barand', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)     # 粉丝牌开关
-request_crewmate = on_command('/req crewmate', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER) # 船员开关
-request_state = on_command('/req state', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)       # 状态查询
+if not os.path.exists('group_switcher'):
+    os.makedirs('group_switcher')
 
-upuid_request = on_command('/upuid', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)           # 主播UID
-liveid_request = on_command('/liveid', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)         # 直播间ID
-barandname_request = on_command('/barandname', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER) # 粉丝牌名
-# show_cookie = on_command('/show cookie', priority = 1, block = False, permission = SUPERUSER)                                 # 显示cookie
+cookies_config = os.path.join(file_dir, cookies_json)
+if not os.path.exists(cookies_config):
+    with open(cookies_config, 'w') as initial:
+        json.dump(cookies_init, initial)
 
-# 创建配置文件
-@request_initial.handle()
-async def request_initial_(event: GroupMessageEvent):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 创建文件名
-    if not os.path.exists('switcher_group'): # 判断文件是否存在
-        os.makedirs('switcher_group') # 创建 switcher_group 文件夹
-    filesave_full_path = os.path.join(filesave_dir, filename) # 完整保存路径
-    cookie_full_path = os.path.join(filesave_dir, cookie)     # cookie 保存路径
-    switcher_start = {'group_id': group_id, 'request': "off", 'fans': "off", 'barand': "off", 'crewmate': "off", 'up_uid': "", 'up_live_id': "", 'barand_name' : ""} # 初始化
-    cookies_start = {'cookie': "<Put Your Cookie In Here>"} # 创建cookies存放文件
-    with open(filesave_full_path, 'w') as initial: # 初始化开关状态
-        json.dump(switcher_start, initial) # 写入初始化内容
-        logger.info('已创建' + filename + '文件' )
-    if not os.path.exists(cookie_full_path): # 判断文件是否存在
-        with open(cookie_full_path, 'w') as cookie_initial: # 初始化cookie
-            json.dump(cookies_start, cookie_initial) # 写入初始化cookie内容
-            logger.info('已创建' + cookie + '文件')
-    await request_initial.send('初始化成功')
+cookies_fullPath = os.path.join(file_dir, cookies_json)
+cookies_json = json.load(open(cookies_fullPath))
+cookies_ = cookies_json['cookies']
 
-# 主开关
-@request_main.handle()
-async def request_main_(event: GroupMessageEvent, request_main_: Message = CommandArg()):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename) # 完整路径
-    with open (filesave_full_path, 'rb') as load_request_initial: # 记录主开关状态
-        updata = json.load(load_request_initial)
-        request_switch = request_main_.extract_plain_text() # 提取主开关信息
-        updata['request'] = request_switch # 更新主开关状态
-        dict = updata
-    load_request_initial.close # 关闭文件
-    with open(filesave_full_path, 'w') as write_switch_request: #写入主开关状态
-        json.dump(dict,write_switch_request) # 写入更新主开关状态后的字符
-    write_switch_request.close # 关闭文件
+headers_ = {
+            "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux) Gecko/20100101 Firefox/64.0",
+            "cookies":cookies_
+           }
+
+def init(groupid, uid):
+
+    groupid_str = str(groupid)
+    uid_str = str(uid)
+
+    makedir = os.path.join(file_dir, groupid_str)
+    if not os.path.exists(makedir):
+        os.makedirs(makedir)
+
+    config_fullPath = os.path.join(file_dir, groupid_str, 'config.json')
+    captain_fullPath = os.path.join(file_dir, groupid_str, 'captain.json')
+
+    info_url = ("https://api.bilibili.com/x/space/acc/info?mid=" + uid_str)
     
-    switcher_group = (dict['group_id']) # 群ID
-    switcher_request = (dict['request']) # 主开关
-    if group_id in switcher_group:
-        if 'on' in switcher_request:
-            await request_main.send(f'主开关：开') # 发送开启成功主开关通知
-        else:
-            await request_main.send(f'主开关：关') # 发送关闭成功主开关通知
-    else:
-        await request_main.send('未初始化')
+    info = requests.get(info_url, headers = headers_)
+    info_json = json.loads(info.text)
+    info_code = str(info_json['code'])
+    if (info_code == '0'):
+        info_name = str(info_json['data']['name'])
 
-# 粉丝开关
-@request_fans.handle()
-async def request_fans_(event: GroupMessageEvent, request_fans_: Message = CommandArg()):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename) # 完整路径
-    with open (filesave_full_path, 'rb') as load_request_fans: # 记录粉丝开关状态
-        updata = json.load(load_request_fans)
-        request_switch = request_fans_.extract_plain_text() # 提取粉丝开关信息
-        updata['fans'] = request_switch # 更新粉丝开关状态
-        dict = updata
-    load_request_fans.close # 关闭文件
-    with open(filesave_full_path, 'w') as write_switch_request: #写入粉丝开关状态
-        json.dump(dict,write_switch_request) # 写入更新主开关状态后的字符
-    write_switch_request.close # 关闭文件
-    
-    switcher_group = (dict['group_id'])
-    switcher_request = (dict['request']) # 主开关
-    switcher_fans = (dict['fans']) # 粉丝开关
-    if group_id in switcher_group:
-        if 'on' in switcher_request:
-            if 'on' in switcher_fans:
-                await request_fans.send(f'粉丝开关：开') # 发送开启成功粉丝开关通知
+        if (info_json['data']['live_room'] != None):
+
+            info_roomid = str(info_json['data']['live_room']['roomid'])
+
+            captain_url_info = ("https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?roomid=" + info_roomid + "&page=1&ruid=" + uid_str + "&page_size=30")
+            
+            captain_info = requests.get(captain_url_info, headers = headers_)
+            captain_json = json.loads(captain_info.text)
+            captain_code = str(captain_json['code'])
+
+            if (captain_code == '0'):
+                captain_page = captain_json['data']['info']['page']
+                captain_num = captain_json['data']['info']['num']
+
+                if os.path.exists(config_fullPath):
+                    with open(config_fullPath, 'r', encoding = 'utf-8') as load_config:
+                        updata_config = json.load(load_config)
+                        updata_config_json = {"live":{"roomid":info_roomid,"captain_num":captain_num}}
+                        updata_config.update(updata_config_json)
+                
+                    with open(config_fullPath, 'w', newline = '\n', encoding = 'utf-8') as config_updata:
+                        json.dump(updata_config, config_updata, indent = 4, ensure_ascii = False)
+
+                if not os.path.exists(config_fullPath):
+                    init_live_json = {"uid":uid,"name":info_name,"live":{"roomid":info_roomid,"captain_num":captain_num},"switcher":[{"main":1,"fans":0,"barand":0,"captain":0,"log":0}]}
+                    init_live_data = json.dumps(init_live_json, indent = 4, ensure_ascii = False)
+                    
+                    with open(config_fullPath, 'w', newline = '\n', encoding = 'utf-8') as init_live:
+                        init_live.write(init_live_data)
+
+                if not os.path.exists(captain_fullPath):
+                    init_captain_json = {"captain_page":captain_page,"captain_num":captain_num}
+                    init_captain_data = json.dumps(init_captain_json, indent = 4, ensure_ascii = False)
+
+                    with open(captain_fullPath, 'w', newline = '\n', encoding = 'utf-8') as init_captain:
+                        init_captain.write(init_captain_data)
+                
+                    captain_top3 = captain_json['data']['top3']
+                    for captain_list_t3 in captain_top3:
+                        top3_uid = captain_list_t3['uid']
+                        top3_name = captain_list_t3['username']
+                        top3_level = captain_list_t3['medal_info']['medal_level']
+
+                        with open(captain_fullPath, 'r', encoding = 'utf-8') as load_config:
+                            content_t3 = json.load(load_config)
+                            updata_config_json = {top3_uid:{"name":top3_name,"level":top3_level}}
+                            content_t3.update(updata_config_json)
+                    
+                        with open(captain_fullPath, 'w', newline = '\n', encoding = 'utf-8') as config_updata:
+                            json.dump(content_t3, config_updata, indent = 4, ensure_ascii = False)
+
+                    page = 1
+                    for i in range(captain_page):
+                        captain_url_normal = ("https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?roomid={}&page=" + str(page) + "&ruid=" + uid_str + "&page_size=30").format(info_roomid)
+                        captain_normal_info = requests.get(captain_url_normal, headers = headers_)
+                        captain_normal_json = json.loads(captain_normal_info.text)
+                        captain_normal_code = str(captain_normal_json['code'])
+
+                        if (captain_normal_code == '0'):
+                            captain_normal = captain_normal_json['data']['list']
+                            for captain_list in captain_normal:
+                                normal_uid = captain_list['uid']
+                                normal_name = captain_list['username']
+                                normal_level = captain_list['medal_info']['medal_level']
+
+                                with open(captain_fullPath, 'r', encoding = 'utf-8') as load_config:
+                                    content_nor = json.load(load_config)
+                                    updata_config_json = {normal_uid:{"name":normal_name,"level":normal_level}}
+                                    content_nor.update(updata_config_json)
+                            
+                                with open(captain_fullPath, 'w', newline = '\n', encoding = 'utf-8') as config_updata:
+                                    json.dump(content_nor, config_updata, indent = 4, ensure_ascii = False)
+                        page = page + 1
+                        
+                else:
+                    print('File[captain.json] --> Exists/Updata')
             else:
-                await request_fans.send(f'粉丝开关：关') # 发送关闭成功粉丝开关通知
-        else:
-            await request_fans.send('提示：主开关未打开')
-    else:
-        await request_fans.send('未初始化')
+                print('Error[Captain] --> ' + captain_code)
 
-#粉丝团开关
-@request_barand.handle()
-async def request_barand_(event: GroupMessageEvent, request_barand_: Message = CommandArg()):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename)  # 完整路径
-    with open (filesave_full_path, 'rb') as load_request_fans: # 记录粉丝牌开关状态
-        updata = json.load(load_request_fans)
-        request_switch = request_barand_.extract_plain_text()  # 提取粉丝牌开关信息
-        updata['barand'] = request_switch # 更新粉丝牌开关状态
-        dict = updata
-    load_request_fans.close # 关闭文件
-    with open(filesave_full_path, 'w') as write_switch_request: #写入粉丝牌开关状态
-        json.dump(dict,write_switch_request) # 写入更新粉丝牌开关状态后的字符
-    write_switch_request.close # 关闭文件
-    
-    switcher_group = (dict['group_id'])
-    switcher_request = (dict['request']) # 主开关
-    switcher_barand = (dict['barand']) # 粉丝牌开关
-    if group_id in switcher_group:
-        if 'on' in switcher_request:
-            if 'on' in switcher_barand:
-                await request_barand.send(f'粉丝团：开') # 发送开启成功粉丝牌开关通知
+        else:
+            init_Nlive_json = {"uid":uid,"name":info_name,"live":None,"switcher":[{"main":1,"fans":0,"log":0}]}
+            init_Nlive_data = json.dumps(init_Nlive_json, indent = 4, ensure_ascii = False)
+            with open(config_fullPath, 'w', newline = '\n', encoding = 'utf-8') as init_Nlive:
+                init_Nlive.write(init_Nlive_data)
+
+    else:
+        print('Error[userinfo] --> ' + info_code)
+
+def request(groupid, uid, getID):
+    groupid_str = str(groupid)
+    uid_str = str(uid)
+    bot:Bot
+
+    time_data = datetime.datetime.now()
+    log_data = time_data.strftime("%Y-%m-%d")
+
+    config_fullPath = os.path.join(file_dir, groupid_str, 'config.json')
+    captain_fullPath = os.path.join(file_dir, groupid_str, 'captain.json')
+    log_fullPath_mkdir = os.path.join(file_dir, groupid_str, log_dir)
+    log_fullPath = os.path.join(file_dir, groupid_str, log_dir, log_data + '.log')
+
+    config_json = json.load(open(config_fullPath))
+    load_config_json = json.load(open(captain_fullPath, encoding = 'utf-8'))
+
+    load_uid = config_json['uid']
+    load_live = config_json['live']
+    load_switch_log = config_json['switcher'][0]['log']
+    load_switch_main = config_json['switcher'][0]['main']
+    load_switch_fans = config_json['switcher'][0]['fans']
+
+
+    if (load_live != None):
+        load_live_roomid = config_json['live']['roomid']
+        load_live_captain_num = config_json['live']['captain_num']
+        load_switch_barand = config_json['switcher'][0]['barand']
+        load_switcher_captain = config_json['switcher'][0]['captain']
+
+    if (load_switch_log == 1):
+        if not os.path.exists(log_fullPath_mkdir):
+            os.makedirs(log_fullPath_mkdir)
+
+    if (load_switch_main == 1):
+        
+        if (load_switcher_captain == 1):
+            captain_url = ("https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?roomid={}&page=1&ruid=" + str(load_uid) + "&page_size=30").format(str(load_live_roomid))
+            captain_info = requests.get(captain_url, headers = headers_)
+            captain_json = json.loads(captain_info.text)
+            captain_code = str(captain_json['code'])
+            if (captain_code == '0'):
+                captain_num = captain_json['data']['info']['num']
+
+                if (captain_num == load_live_captain_num):
+                    if uid_str in load_config_json:
+                        print('pass')
+                        logging.basicConfig(filename = log_fullPath, level = logging.INFO, 
+                        format='%(asctime)s %(levelname)s %(message)s')
+                        logging.info('QQ --> ' + str(getID) + '  UID --> ' + uid_str + ' [CAPTAIN PASS]')
+                        return 1
+
+                    else:
+                        print('blocked')
+                        logging.basicConfig(filename = log_fullPath, level = logging.INFO, 
+                        format='%(asctime)s %(levelname)s %(message)s')
+                        logging.info('QQ --> ' + str(getID) + '  UID --> ' + uid_str + ' [CAPTAIN BLOCKED]')
+
+                elif (captain_num != load_live_captain_num):
+                    os.remove(captain_fullPath)
+                    init(groupid, uid)
+
+        if (load_switch_barand == 1):
+            barand_url = ("https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id=".format(uid_str))
+            barand_info = requests.get(barand_url, headers = headers_)
+            barand_json = json.loads(barand_info.text)
+            barand_code = str(barand_json['code'])
+
+            if (barand_code == '0'):
+                barand_arr = barand_json['data']['list']
+
+                for barand_list in barand_arr:
+                    barand_uid = barand_list['mid']
+
+                    if (str(barand_uid) in str(load_uid)):
+                        print('pass')
+                        logging.basicConfig(filename = log_fullPath, level = logging.INFO, 
+                        format='%(asctime)s %(levelname)s %(message)s')
+                        logging.info('QQ --> ' + str(getID) + '  UID --> ' + uid_str + ' [BARAND PASS]')
+                        return 1
+
+            elif (barand_code == '22115'):
+                print('Error[barrand_requests] --> No Perm')
+                logging.basicConfig(filename = log_fullPath, level = logging.INFO, 
+                format='%(asctime)s %(levelname)s %(message)s')
+                logging.info('QQ --> ' + str(getID) + '  UID --> ' + uid_str + ' [BARAND BLOCKED_PREM]')
+            
             else:
-                await request_barand.send(f'粉丝团：关') # 发送关闭成功粉丝牌开关通知
-        else:
-            await request_barand.send('提示：主开关未打开')
-    else:
-        await request_barand.send('未初始化')
+                print('Error[barrand_requests] --> ' + barand_code)
+                logging.basicConfig(filename = log_fullPath, level = logging.INFO, 
+                format='%(asctime)s %(levelname)s %(message)s')
+                logging.error('QQ --> ' + str(getID) + '  UID --> ' + uid_str + ' [BARAND ERROR' + barand_code + ']')
 
-#大航海船员开关
-@request_crewmate.handle()
-async def request_crewmate_(event: GroupMessageEvent, request_crewmate_: Message = CommandArg()):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename) # 完整路径
-    with open (filesave_full_path, 'rb') as load_request_fans:  # 记录大航海船员开关状态
-        updata = json.load(load_request_fans)
-        request_switch = request_crewmate_.extract_plain_text() # 提取大航海船员开关信息
-        updata['crewmate'] = request_switch # 更新大航海船员开关状态
-        dict = updata
-    load_request_fans.close # 关闭文件
-    with open(filesave_full_path, 'w') as write_switch_request: #写入大航海船员开关状态
-        json.dump(dict,write_switch_request) # 写入更新大航海船员开关状态后的字符
-    write_switch_request.close # 关闭文件
-    
-    switcher_group = (dict['group_id'])
-    switcher_request = (dict['request']) # 主开关
-    switcher_crewmate = (dict['crewmate']) # 大航海船员开关
-    if group_id in switcher_group:
-        if 'on' in switcher_request:
-            if 'on' in switcher_crewmate:
-                await request_crewmate.send(f'船员：开') # 发送开启成功大航海船员开关通知
+        if (load_switch_fans == 1): 
+            sub_url = ("https://api.bilibili.com/x/relation/followings?vmid={}&pn=1&ps=50&order=desc&order_type=attention".format(uid_str))
+            sub_info = requests.get(sub_url, headers = headers_)
+            sub_json = json.loads(sub_info.text)
+            sub_code = str(sub_json['code'])
+
+            if (sub_code == '0'):
+                sub_arr = sub_json['data']['list']
+
+                for sub_list in sub_arr:
+                    sub_uid = sub_list['mid']
+
+                    if (str(sub_uid) in str(load_uid)):
+                        print('pass')
+                        logging.basicConfig(filename = log_fullPath, level = logging.INFO, 
+                        format='%(asctime)s %(levelname)s %(message)s')
+                        logging.error('QQ --> ' + str(getID) + '  UID --> ' + uid_str + ' [FANS PASS]')
+                        return 1
+
+            elif (sub_code == '22115'):
+                print('Error[sub_requests] --> No Perm')
+                logging.basicConfig(filename = log_fullPath, level = logging.INFO, 
+                format='%(asctime)s %(levelname)s %(message)s')
+                logging.info('QQ --> ' + str(getID) + '  UID --> ' + uid_str + ' [FANS BLOCKED_PREM]')
+
             else:
-                await request_crewmate.send(f'船员：关') # 发送关闭成功大航海船员开关通知
-        else:
-            await request_crewmate.send('提示：主开关未打开')
-    else:
-        await request_crewmate.send('未初始化')
+                print('Error[sub_requests] --> ' + sub_code)
+                logging.basicConfig(filename = log_fullPath, level = logging.INFO, 
+                format='%(asctime)s %(levelname)s %(message)s')
+                logging.error('QQ --> ' + str(getID) + '  UID --> ' + uid_str + ' [FANS ERROR' + sub_code + ']')
 
-# 状态信息
-@request_state.handle()
-async def request_state_(event: GroupMessageEvent):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename) # 完整路径
-    load_file = open(filesave_full_path) # 打开文件
-    dict = json.load(load_file)          # 加载文件信息
-    # 读取指定开关内容
-    switcher_groupid = (dict['group_id'])      # 群ID
-    switcher_request = (dict['request'])       # 主开关
-    switcher_fans = (dict['fans'])             # 粉丝开关
-    switcher_barand = (dict['barand'])         # 粉丝牌开关
-    switcher_crewmate = (dict['crewmate'])     # 船员开关
-    upuid_request = (dict['up_uid'])           # 主播UID
-    liveid_request = (dict['up_live_id'])      # 直播间ID
-    barandname_request = (dict['barand_name']) # 粉丝牌名
-    if int(switcher_groupid) == event.group_id:
-        await request_state.send('本群审核开关\n主开关：' + switcher_request + '\n粉丝开关：' + switcher_fans + '\n粉丝团开关：' + switcher_barand + '\n大航海船员开关：' + switcher_crewmate + '\n\n主播UID：' + upuid_request + '\n主播直播间ID：' + liveid_request + '\n牌子名称：' + barandname_request)
-    else:
-        await request_state.send('未初始化')
-
-# 主播uid
-@upuid_request.handle()
-async def upuid_request_(event: GroupMessageEvent, upuid_request_: Message = CommandArg()):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename) # 完整路径
-    with open (filesave_full_path, 'rb') as load_uid_request: # 记录UID
-        updata = json.load(load_uid_request)
-        upuid = upuid_request_.extract_plain_text() # 提取UID信息
-        updata['up_uid'] = upuid                    # 更新UID内容
-        dict = updata
-    load_uid_request.close                          # 关闭文件
-    with open(filesave_full_path, 'w') as upuid:    #写入UID信息
-        json.dump(dict,upuid)                       # 写入更新UID后的字符
-    upuid.close                                     # 关闭文件
+def main_Switch(group_id, main, fans, barand, captain, log):
     
-    switcher_groupid = (dict['group_id'])
-    switcher_request = (dict['request']) # 主开关
-    if int(switcher_groupid) == event.group_id:
-        if 'on' in switcher_request:
-            await upuid_request.send('主播UID更新为：' + upuid_request_) # 发送UID更新成功
-        else:
-            await upuid_request.send('提示：提示：主开关未打开')
-    else:
-        await upuid_request.send('未初始化')
-
-# 直播间id
-@liveid_request.handle()
-async def live_request_(event: GroupMessageEvent, liveid_request_: Message = CommandArg()):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename)  # 完整路径
-    with open (filesave_full_path, 'rb') as load_live_request: # 记录直播间ID
-        updata = json.load(load_live_request)
-        liveid = liveid_request_.extract_plain_text()          # 提取直播间ID
-        updata['up_live_id'] = liveid                          # 更新直播间ID
-        dict = updata
-    load_live_request.close                                    # 关闭文件
-    with open(filesave_full_path, 'w') as liveid:              #写入直播间ID
-        json.dump(dict,liveid)                                 # 写入更新直播间ID后的字符
-    liveid.close                                               # 关闭文件
+    groupid_str = str(group_id)
+    config_fullPath = os.path.join(file_dir, groupid_str, 'config.json')
     
-    switcher_groupid = (dict['group_id'])
-    switcher_request = (dict['request']) # 主开关
-    if int(switcher_groupid) == event.group_id:
-        if 'on' in switcher_request:
-            await liveid_request.send('直播间ID更新为：' + liveid_request_) # 发送直播间ID更新成功
-        else:
-            await liveid_request.send('提示：主开关未打开')
-    else:
-        await liveid_request.send('未初始化')
+    with open(config_fullPath, 'r', encoding = 'utf-8') as load_switch:
+        content_switch = json.load(load_switch)
+        for switch in content_switch['switcher']:
+            switch['main'] = main
+            switch['fans'] = fans
+            switch['barand'] = barand
+            switch['captain'] = captain
+            switch['log'] = log
 
-# 粉丝牌名
-@barandname_request.handle()
-async def barandname_request_(event: GroupMessageEvent, barandname_request_: Message = CommandArg()):
-    group_id = str(event.group_id)
-    filename = group_id + '.json' # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename)  # 完整路径
-    with open (filesave_full_path, 'rb') as load_live_request: # 记录粉丝牌名
-        updata = json.load(load_live_request)
-        brandaname = barandname_request_.extract_plain_text()  # 提取粉丝牌信息
-        updata['barand_name'] = brandaname                     # 更新粉丝牌信息
-        dict = updata
-    load_live_request.close                                    # 关闭文件
-    with open(filesave_full_path, 'w') as brandaname:          #写入粉丝牌信息
-        json.dump(dict,brandaname)                             # 写入更新粉丝牌后的字符
-    brandaname.close                                           # 关闭文件
-    
-    switcher_groupid = (dict['group_id'])
-    switcher_request = (dict['request']) # 主开关
-    if int(switcher_groupid) == event.group_id:
-        if 'on' in switcher_request:
-            await barandname_request.send('粉丝牌名更新为：' + barandname_request_) # 发送粉丝牌名更新成功
-        else:
-            await barandname_request.send('提示：主开关未打开')
-    else:
-        await barandname_request.send('未初始化')
+    with open(config_fullPath, 'w', newline = '\n', encoding = 'utf-8') as switch_updata:
+        json.dump(content_switch, switch_updata, indent = 4, ensure_ascii = False)
 
-'''
-# 显示cookie
-@show_cookie.handle()
-async def show_cookie_(bot: Bot, event: GroupMessageEvent):
+initial = on_command('/init', priority = 1, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
+switch = on_command('/switch', priority = 2, block = False, permission = GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
 
-    cookie_full_path = os.path.join(filesave_dir, cookie) # cookie完整路径
-    file_cooke = open(cookie_full_path)                   # 打开文件
-    load_cookie = json.load(file_cooke)                   # 加载cookie信息
-    cookie_ = (load_cookie['cookie'])
+@initial.handle()
+async def initial_(event: GroupMessageEvent, initial: Message = CommandArg()):
+    groupid = str(event.group_id)
+    initial_ = initial.extract_plain_text()
+    config_fullPath = os.path.join(file_dir, groupid , 'config.json')
+    captain_fullPath = os.path.join(file_dir, groupid , 'captain.json')
+    if os.path.exists(config_fullPath):
+        os.remove(config_fullPath)
+    if os.path.exists(captain_fullPath):
+        os.remove(captain_fullPath)
+    init(groupid, initial_)
 
-    await show_cookie.send('请勿发送cookie给任何人！！！\n\n' + cookie_ + '\n\n请勿发送cookie给任何人！！！')
-'''
+@switch.handle()
+async def initial_(event: GroupMessageEvent, switch: Message = CommandArg()):
+    groupid = str(event.group_id)
+    switch_ = switch.extract_plain_text()
+    switch_list = switch_.split("，")
 
-# 入群审核
+    if switch_list[0] in ["开", "开启"]:
+        main = 1
+    elif switch_list[0] in ["关", "关闭"]:
+        main = 0
+
+    if switch_list[1] in ["开", "开启"]:
+        fans = 1
+    elif switch_list[1] in ["关", "关闭"]:
+        fans = 0
+
+    if switch_list[2] in ["开", "开启"]:
+        barand = 1
+    elif switch_list[2] in ["关", "关闭"]:
+        barand = 0
+
+    if switch_list[3] in ["开", "开启"]:
+        captain = 1
+    elif switch_list[3] in ["关", "关闭"]:
+        captain = 0
+
+    if switch_list[4] in ["开", "开启"]:
+        log = 1
+    elif switch_list[4] in ["关", "关闭"]:
+        log = 0
+    main_Switch(groupid, main, fans, barand, captain, log)
+
 group_req = on_request(priority=1, block=False)
 
 @group_req.handle()
 async def request_fans_(bot: Bot, event: GroupRequestEvent):
-    #加载配置文件
-    group_id = str(event.group_id)                            # 群id
-    filename = group_id + '.json'                             # 文件名
-    filesave_full_path = os.path.join(filesave_dir, filename) # 完整路径
-    load_file = open(filesave_full_path)                      # 打开文件
-    dict = json.load(load_file)                               # 加载配置文件
-    cookie_full_path = os.path.join(filesave_dir, cookie)     # cookie完整路径
-    file_cooke = open(cookie_full_path)                       # 打开文件
-    load_cookie = json.load(file_cooke)                       # 加载cookie信息
-    #提取信息
-    switcher_groupid = (dict['group_id'])           # 群ID
-    switcher_request = (dict['request'])            # 主开关
-    switcher_fans = (dict['fans'])                  # 粉丝开关
-    switcher_barand = (dict['barand'])              # 粉丝牌开关
-    switcher_crewmate = (dict['crewmate'])          # 船员开关
-    upuid_request = (dict['up_uid'])                # 主播uid
-    liveid_request = (dict['up_live_id'])           # 直播间id
-    barandname_request = (dict['barand_name'])      # 粉丝牌名
-    cookie_ = (load_cookie['cookie'])               # cookie展示
-    # 开关判断
-    if int(switcher_groupid) == event.group_id:
-        # 粉丝入群
-        if 'on' == switcher_request:   # 判断主开关是否开启
-            raw = json.loads(event.json())
-            gid = str(event.group_id)
-            uid = str(event.user_id)
-            flag = raw['flag']
-            logger.info('flag:', str(flag))
-            sub_type = raw['sub_type']
-            comment = raw['comment']
-            biliuid = ''.join(filter(str.isdigit,comment))
-            if 'on' == switcher_fans:  # 判断粉丝开关是否开启
-                url_fans = ('https://api.bilibili.com/x/relation/followings?vmid=' + biliuid + '&pn=1&ps=50&order=desc&order_type=attention') # <- API
-                response_fans = requests.get(url_fans)
-                response_fans_text = response_fans.text
-                logger.info(response_fans_text)
-                time.sleep(6)
-                # 同意入群
-                if upuid_request in response_fans_text:
-                        logger.info(f"同意{uid}加入群 {gid},验证消息为 “{comment}”")
-                        await bot.set_group_add_request(
-                            flag=flag,
-                            sub_type=sub_type,
-                            approve=True,
-                            reason=' ',
-                        )
-            else:
-                logger.error('fans off = group{group_id}')
-            # 粉丝团成员入群
-            if 'on' == switcher_barand:
-                cookies = {"cookie": cookie_}
-                url_barand = ('https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id=' + biliuid) # <- API
-                response_barand = requests.get(url_barand, cookies = cookies)
-                response_barand_text = response_barand.text
-                logger.info(response_barand_text)
-                time.sleep(6)
-                # 同意入群
-                if barandname_request in response_barand_text:
-                        logger.info(f"同意{uid}加入群 {gid},验证消息为 “{comment}”")
-                        await bot.set_group_add_request(
-                            flag=flag,
-                            sub_type=sub_type,
-                            approve=True,
-                            reason=' ',
-                        )
-                #未配置cookie提示
-                if  '账号未登录' in response_barand_text:
-                    logger.error('BiliRequest: 未配置cookies')
-            else:
-                logger.error('barand off = group{group_id}')
-            # 以下功能暂未实现(大航海船员入群)
-            '''
-            if 'on' == switcher_crewmate:
-                cookies = {"cookie": cookie_}
-                url_main = ('https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?roomid=' + liveid_request + '&page=' + i + '&ruid=' + (upuid_request + '&page_size=30') # <- API
-                response = requests.get(url_main, cookies = cookies)
-                response_text = response.text
-                time.sleep(6)
+    groupid = str(event.group_id)
+    getID = str(event.user_id)
+    uid_json = json.loads(event.json())
+    flag = uid_json['flag']
+    uid_str = uid_json['comment']
+    sub_type = uid_json['sub_type']
+    uid = ''.join(filter(str.isdigit,uid_str))
+    status = request(groupid, uid, getID)
 
-                # 同意入群
-                if biliuid in response_text:
-                        logger.info(f"同意{uid}加入群 {gid},验证消息为 “{comment}”")
-                        await bot.set_group_add_request(
-                            flag=flag,
-                            sub_type=sub_type,
-                            approve=True,
-                            reason=' ',
-                        )
-                #未配置cookie提示
-                if  '账号未登录' in response:
-                    logger.error('BiliRequest: 未配置cookies')
-            else:
-                logger.info('crewmate off')
-            '''
+    if status == 1:
+        await bot.set_group_add_request(
+            flag = flag,
+            sub_type = sub_type,
+            approve = True,
+            reason=' ',
+        )

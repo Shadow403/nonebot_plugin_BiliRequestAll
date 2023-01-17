@@ -10,43 +10,46 @@
 
 <div align=left> <div>
 
+
+<p align="center">
+  <img src=https://img.shields.io/github/stars/Shadow403/nonebot_plugin_BiliRequestAll.svg alt="Start">
+  <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/nonebot-2.0.0b1+-red.svg" alt="NoneBot">
+  <img src="https://img.shields.io/badge/onebot-2.0.0b1+-darkgreen.svg" alt="OneBot">
+  </a>
+</p>
+
 ## 已实现功能
 - 单插件分群管理
 - 以B站UID审核入群（粉丝）
 - 以B站UID审核入群（粉丝团）
+- 以B站UID审核入群（大航海）
 
 ## 安装方法
 
-- 使用pip
 ```
 pip install nonebot_plugin_BiliRequestAll
 ```
 
 ## 说明依赖
 ```
-01| nonebot2 >= 2.0.0b1
-02| nonebot-adapter-onebot >= 2.0.0b1
-03| requests >= 2.5
-04| os, json, time
+XX| [可运行依赖版本]                       [测试依赖版本]
+01| nonebot2 >= 2.0.0b1                   [2.0.0rc2]
+02| nonebot-adapter-onebot >= 2.0.0b1     [2.2.0]
+03| requests >= 2.5                       [2.28.2]
+04| os, json, time                        [XX]
 ```
 ## 命令
-### 基础命令
-- #### /req initialize  # 初始化群审核插件
-- #### /req   on/off  # 群审核主开关
-- #### /req fans   on/off  # 群审核粉丝开关
-- #### /req barand   on/off  # 群审核粉丝团开关
-- ####  /req crewmate   on/off  # 群审核大航海船员开关（暂未实现）
-### 配置参数命令
-- #### /upuid   <纯数字>  # 配置主播UID
-- #### /liveid   <纯数字>  # 配置直播间号
-- #### /barandname   <粉丝牌名>  # 配置粉丝牌名 
+- ### /init [uid]  # 初始化群审核插件
+- ### /switch [主开关]，[粉丝]，[粉丝团]，[大航海]，[日志] 
+- ### ("[ ]"中填写开/关，注意顺序，要用"，"隔开)
 
 ## 注意事项
 ```
-加载插件并初始完成后，会在机器人目录下创建'switcher_group'文件夹,进入文件夹
-找到文件'@cookie.json'打开
+加载插件并初始完成后，会在机器人目录下创建'group_switcher'文件夹,进入文件夹
+找到文件'cookies.json'打开
 
-  {"cookie": "<Put Your Cookie In Here>"}  #将cookie完整粘贴进这里
+  {"cookies": "<Put Your Cookie In Here>"}  #将cookie完整粘贴进这里
               ^^^^^^^^^^^^^^^^^^^^^^^^^
               
 保存，关闭文件
@@ -56,10 +59,13 @@ pip install nonebot_plugin_BiliRequestAll
 </p>
 
 ## 未来计划
-- ### Tips：如果在不咕的情况下 
-  - 审核大航海船员
-  - UID一次性化
-  - 群黑白名单
+- ### 强审核模式
 
-### 反馈问题
-- #### 邮箱：anonymous_hax@foxmail.com
+## 反馈问题
+- ### 邮箱：anonymous_hax@foxmail.com
+
+<details>
+<summary>[日志]展开/收起</summary>
+
+- 2022/10/03 发布此插件
+- 2023/01/18 更新插件数据结构，新增大航海入群功能
