@@ -36,7 +36,7 @@ pip install nonebot_plugin_BiliRequestAll
 XX| [可运行依赖版本]                       [测试依赖版本]
 01| nonebot2 >= 2.0.0b1                   [2.0.0rc2]
 02| nonebot-adapter-onebot >= 2.0.0b1     [2.2.0]
-03| requests >= 2.5                       [2.28.2]
+03| requests >= 2.2                       [2.28.2]
 04| os, json, time                        [XX]
 ```
 ## 命令
