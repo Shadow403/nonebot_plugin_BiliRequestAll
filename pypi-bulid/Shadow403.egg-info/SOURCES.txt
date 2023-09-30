@@ -1,0 +1,12 @@
+LICENSE
+README.md
+setup.py
+Shadow403.egg-info/PKG-INFO
+Shadow403.egg-info/SOURCES.txt
+Shadow403.egg-info/dependency_links.txt
+Shadow403.egg-info/requires.txt
+Shadow403.egg-info/top_level.txt
+nonebot_plugin_BiliRequestAll/__init__.py
+nonebot_plugin_BiliRequestAll/api.py
+nonebot_plugin_BiliRequestAll/func.py
+nonebot_plugin_BiliRequestAll/log.py
