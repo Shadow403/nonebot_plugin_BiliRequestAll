@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/nonebot-2.0.0+-red.svg" alt="NoneBot">
   <img src="https://img.shields.io/badge/onebot-2.2.3+-darkgreen.svg" alt="OneBot">
-  <img src="https://img.shields.io/badge/version-0.3.0-yellow.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-0.2.6-yellow.svg" alt="Version">
   </a>
 </p>
 
@@ -42,12 +42,16 @@ XX| [可运行依赖版本]                       [测试依赖版本]
 ### 食用方法 (初始化)
 - ("[]"中填写`on`/`off` "<>"中填写纯数字，注意顺序，要用"_"隔开)
 ```
-/rqst [主开关]_[日志开关]_<主播UID>_<最低等级要求>
+/rqst [主开关]_[强审核]_<主播UID>_<最低等级要求>
 ``` 
+```
+强审核: 不满足要入群要求会自动拒绝, 如设为 off 会忽略该加群请求 (等待人工审核)
+```
+
 
 ### 未来计划
-- 审批日志
-- 强审核模式
+- [ ] 审批日志
+- [x] 强审核模式
 
 ### 反馈问题
 - 邮箱：anonymous_hax@foxmail.com

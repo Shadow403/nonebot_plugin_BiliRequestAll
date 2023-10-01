@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="Shadow403",
-    version="0.2.5",
+    version="0.2.6",
     author="Shadow403",
     author_email="anonymous_hax@foxmail.com",
     description="Use Medal Support Join QQ Group",
@@ -14,7 +14,7 @@ setup(
     url="https://github.com/Shadow403/nonebot_plugin_BiliRequestAll",
     packages=find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
