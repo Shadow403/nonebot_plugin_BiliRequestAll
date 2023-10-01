@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="Shadow403",
+    name="nonebot_plugin_BiliRequestAll",
     version="0.2.6b1",
     author="Shadow403",
     author_email="anonymous_hax@foxmail.com",
