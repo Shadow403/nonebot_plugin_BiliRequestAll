@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="Shadow403",
-    version="0.2.6",
+    version="0.2.6b1",
     author="Shadow403",
     author_email="anonymous_hax@foxmail.com",
     description="Use Medal Support Join QQ Group",
