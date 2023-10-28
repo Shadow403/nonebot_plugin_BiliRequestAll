@@ -2,7 +2,7 @@
 # @Time    : 2023/9/29
 # @Author  : Shadow403
 # @Version : 0.2.7
-# @Email   : anonymous_hax@foxmail.com
+# @Email   : admin@shadow403.cn
 # @Software: Visual Studio Code
 
 """
