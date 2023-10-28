@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="nonebot_plugin_BiliRequestAll",
-    version="0.2.6",
+    version="0.2.7",
     author="Shadow403",
-    author_email="anonymous_hax@foxmail.com",
-    description="Use Medal Support Join QQ Group",
+    author_email="admin@shadow403.cn",
+    description="Use Medal Support Join QGroup",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Shadow403/nonebot_plugin_BiliRequestAll",

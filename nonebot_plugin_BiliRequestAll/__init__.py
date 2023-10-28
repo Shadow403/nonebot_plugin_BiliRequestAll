@@ -1,7 +1,7 @@
 # @python  : 3.11.0
 # @Time    : 2023/9/29
 # @Author  : Shadow403
-# @Version : 0.3.0
+# @Version : 0.2.7
 # @Email   : anonymous_hax@foxmail.com
 # @Software: Visual Studio Code
 
@@ -11,11 +11,22 @@ from .api import biliAPI
 from nonebot.adapters import Message
 from nonebot.params import CommandArg
 from nonebot.permission import SUPERUSER
+from nonebot.plugin import PluginMetadata
 from nonebot import on_request, on_command, logger
 from nonebot.adapters.onebot.v11 import Bot, GroupRequestEvent, GroupMessageEvent
 from nonebot.adapters.onebot.v11.permission import GROUP_OWNER, GROUP_ADMIN
 
 biliAPI = biliAPI()
+
+__plugin_meta__ = PluginMetadata(
+    name="BiliRequestAll",
+    description="通过B站UID审核入群",
+    usage="https://github.com/Shadow403/nonebot_plugin_BiliRequestAll#食用方法-初始化",
+    type="application",
+    homepage="https://github.com/Shadow403/nonebot_plugin_BiliRequestAll",
+    supported_adapters={"~onebot.v11"},
+    extra={},
+)
 
 logDir = "log"
 saveDIr = "groupSwitcher"
@@ -42,8 +53,8 @@ async def groupInit_handle(event: GroupMessageEvent, Initial: Message = CommandA
         await groupInit.finish('数据解析错误\n以"_"作为分隔符\n开关-严格-主播UID-最低等级\nhttps://github.com/Shadow403/nonebot_plugin_BiliRequestAll')
 
     else:
-        groupMainSwitch = switchStatus(initialSwitch[0])
-        groupStrictSwitch = switchStatus(initialSwitch[1])
+        groupMainSwitch = func.switchStatus(initialSwitch[0])
+        groupStrictSwitch = func.switchStatus(initialSwitch[1])
         switchStatusList = [groupMainSwitch, groupStrictSwitch]
         if ("error" in switchStatusList):
             await groupInit.finish('数据解析错误\n以"_"作为分隔符\n开关-严格-主播UID-最低等级\nhttps://github.com/Shadow403/nonebot_plugin_BiliRequestAll')
@@ -99,7 +110,6 @@ groupReq = on_request(priority = 1, block = False)
 @groupReq.handle()
 async def groupReq_handle(bot: Bot, event: GroupRequestEvent):
     groupID = str(event.group_id)
-    # userID = str(event.user_id)
     applyJson = json.loads(event.json())
     applyFlag = applyJson['flag']
     applyUID = applyJson['comment']
