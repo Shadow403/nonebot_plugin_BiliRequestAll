@@ -1,7 +1,7 @@
 # @python  : 3.11.0
 # @Time    : 2023/9/29
 # @Author  : Shadow403
-# @Version : 0.2.7
+# @Version : 0.2.8
 # @Email   : admin@shadow403.cn
 # @Software: Visual Studio Code
 
@@ -117,11 +117,11 @@ async def groupReq_handle(bot: Bot, event: GroupRequestEvent):
     approveUID = ''.join(filter(str.isdigit, applyUID))
     switchStatusList = func.loadSwitchFileData(f"{saveDIr}/{saveJson}", groupID)
     groupMainSwitch = switchStatusList[0]
-    groupStrictMode = switchStatusList[1]
 
     if (groupMainSwitch not in ["groupIdisNull", "off"]):
         getUserMedalInfo = biliAPI.userMedalInfo(approveUID)
         if (getUserMedalInfo[0] == 0):
+            groupStrictMode = switchStatusList[1]
             userMedalLvL = int(getUserMedalInfo[1][0])
             userMedalName = getUserMedalInfo[1][1]
 
