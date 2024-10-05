@@ -43,6 +43,7 @@ pip install nonebot_plugin_BiliRequestAll
 
 > [!IMPORTANT]
 > ("[]"中填写`on`/`off` "<>"中填写纯数字，注意顺序，要用"_"隔开)
+>
 > 强审核: 不满足要入群要求会自动拒绝, 如设为 off 会忽略该加群请求 (等待人工审核)
 
 <br>
