@@ -59,3 +59,4 @@ pip install nonebot_plugin_BiliRequestAll
 - `v0.2.7` 更新API模块
 - `v0.2.8` 修复不满足入群条件时返回信息不全报错
 - `v0.3.0` 重写该插件
+- `v0.3.1` 修改插件名

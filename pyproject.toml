@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-bilirequestall"
-version = "0.3.0"
+version = "0.3.1"
 description = "以B站UID审核入群 😎"
 authors = ["Shadow403 <admin@shadow403.cn>"]
 license = "MIT"
