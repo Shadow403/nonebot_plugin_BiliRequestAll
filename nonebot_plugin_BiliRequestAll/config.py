@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from nonebot import get_plugin_config
 
 _PATH_: str = os.path.dirname(__file__)
-_PLUGINVER_: str = "0.3.0"
+_PLUGINVER_: str = "0.3.2"
 
 class PluginConfig(BaseModel):
     s_dir: str = "data/nonebot_plugin_BiliRequestALL"

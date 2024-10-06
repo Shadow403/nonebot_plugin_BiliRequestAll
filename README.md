@@ -30,10 +30,10 @@ _✨ 基于 [NoneBot2](https://github.com/nonebot/nonebot2) & [WebAPI](https://a
 ## 💿 安装
 
 ```
-nb plugin install nonebot_plugin_bilirequestall
+nb plugin install nonebot_plugin_BiliRequestAll
 ```
 ```
-pip install nonebot_plugin_bilirequestall
+pip install nonebot_plugin_BiliRequestAll
 ```
 
 ## 🍴 使用
@@ -53,10 +53,11 @@ pip install nonebot_plugin_bilirequestall
 
 - `V0.1.0` 发布此插件
 - `V0.2.0` 更新插件数据结构，新增大航海入群功能
-- `V0.2.1` json加载问题 [#6](https://github.com/Shadow403/nonebot_plugin_BiliRequestAll/issues/), 修复粉丝牌审核模块
+- `V0.2.1` json加载问题 [#6](https://github.com/Shadow403/nonebot_plugin_BiliRequestAll/issues/6), 修复粉丝牌审核模块
 - `v0.2.5` 重写该插件
 - `v0.2.6` 更新查看审批信息功能
 - `v0.2.7` 更新API模块
 - `v0.2.8` 修复不满足入群条件时返回信息不全报错
 - `v0.3.0` 重写该插件
 - `v0.3.1` 修改插件名
+- `v0.3.2` 修改插件名 | 移除依赖 `pydantic`
