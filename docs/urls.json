@@ -2,9 +2,9 @@
     "version": "0.3.3",
     "root": "https://api-dev.shadow403.cn/api/bilibili",
     "paths": {
-        "base_info": "user/v1/base_info",
-        "medal_info": "user/v1/medal_info",
-        "medal_owner": "user/v1/medal_owner"
+        "base_info": "v1/user/base_info",
+        "medal_info": "v1/user/medal_info",
+        "medal_owner": "v1/user/medal_owner"
     },
     "parms": {
         "base_info": "?min=",
