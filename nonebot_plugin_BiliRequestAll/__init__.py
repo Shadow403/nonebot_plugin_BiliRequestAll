@@ -1,8 +1,7 @@
 import os, json
 from .controller import *
-from nonebot import logger
+from .config import PluginConfig, config
 from nonebot.plugin import PluginMetadata
-from .config import PluginConfig, config, _PLUGINVER_
 
 __plugin_meta__ = PluginMetadata(
     name="BiliRequestAll",
@@ -19,5 +18,3 @@ if not os.path.exists(config.s_dir):
     os.makedirs(config.s_dir)
     with open(config.s_file, "w") as initData:
         json.dump({"mainSwitch": "on","data": {}}, initData, indent = 4, ensure_ascii = False)
-
-logger.info(f"当前版本 {_PLUGINVER_}")

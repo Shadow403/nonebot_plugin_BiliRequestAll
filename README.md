@@ -61,3 +61,5 @@ pip install nonebot_plugin_BiliRequestAll
 - `v0.3.0` 重写该插件
 - `v0.3.1` 修改插件名
 - `v0.3.2` 修改插件名 | 移除依赖 `pydantic`
+- `v0.3.3` 添加 API🔗 更新
+- `v0.3.4` 添加 API🔗 更新

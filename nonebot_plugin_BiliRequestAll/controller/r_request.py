@@ -1,11 +1,10 @@
 import json
-from .api import BiliAPI
+from .api import API
 from ..config import config
-from nonebot import on_request, logger
+from nonebot import on_request
 from ..utils import func_load_switchdata
 from nonebot.adapters.onebot.v11 import Bot, GroupRequestEvent
 
-API = BiliAPI()
 
 _GReq = on_request(priority = 1, block = False)
 
@@ -18,13 +17,13 @@ async def groupReq_handle(Bot: Bot, Event: GroupRequestEvent):
     _aplUID = "".join(filter(str.isdigit, _aplJson["comment"]))
     _swl = func_load_switchdata(config.s_file, _gid)
 
-    if (_swl[0] in [None, "off"]):
+    if _swl[0] in [None, "off"]:
         await _GReq.finish()
     _user_medal_info = await API._user_medal_info(_aplUID)
-    if (_user_medal_info["code"] != 0):
+    if _user_medal_info["code"] != 0:
         await _GReq.finish()
-    _user_medal_lvl = _user_medal_info["data"]["fans_medal"]["medal"]["level"]
-    _user_medal_name = _user_medal_info["data"]["fans_medal"]["medal"]["medal_name"]
+    _user_medal_lvl = _user_medal_info["data"]["list"][0]["medal_info"]["level"]
+    _user_medal_name = _user_medal_info["data"]["list"][0]["medal_info"]["medal_name"]
 
     if _user_medal_name !=_swl[4]:
         if _swl[1] != "on":
@@ -51,4 +50,3 @@ async def groupReq_handle(Bot: Bot, Event: GroupRequestEvent):
             approve = False,
             reason = "粉丝牌等级过低",
         )
-    
