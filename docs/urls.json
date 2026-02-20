@@ -1,6 +1,6 @@
 {
     "version": "0.3.4",
-    "root": "https://api-dev.shadow403.com.cn/api/bilibili",
+    "root": "https://api-dev.orange25.cn/api/bilibili",
     "paths": {
         "0.3.3": {
             "base_info": "user/v1/base_info",
